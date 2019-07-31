@@ -207,15 +207,45 @@ read_disk:
     mul dx
     mov cx, ax
     mov dx, 0x1f0
+
+    push edi
+
+    ; djb2 hash initial value
+    mov edi, 5381
+    ; 0x7b5
     go_on_read:
         in ax, dx
         mov [bx], ax
         add bx, 2
 
-        ; TODO: our hash function
+        ; djb2 hash function
+        push eax
+        push ebx
+        push ecx
+        push edx
+
+        mov ebx, edi
+        sal edi, 5
+        add edi, ebx    ; edi = edi * 33
+        movzx ecx, al
+        add edi, ecx    ; edi = edi + al
+
+        mov ebx, edi
+        sal edi, 5
+        add edi, ebx    ; edi = edi * 33
+        movzx ecx, ah
+        add edi, ecx    ; edi = edi + ah
+
+        pop edx
+        pop ecx
+        pop ebx
+        pop eax
 
         loop go_on_read
+    ;0x7e1
+    mov ecx, edi ; ecx = hash
 
+    pop edi
     ; TODO: our checkpoint
     ; size = 20
     mov ax, di ; di = size
@@ -228,7 +258,6 @@ read_disk:
     add bx, dx ; bx = KERNEL_ADDR + 17 * 512 = HASH_ADDR
 
     mov eax, DWORD [bx]
-    mov ecx, 0xdeadbeef
     cmp eax, ecx
     jne error_hlt
 
