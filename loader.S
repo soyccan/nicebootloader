@@ -28,7 +28,7 @@ section loader vstart=LOADER_BASE_ADDR
         mov ecx, 20
         int 0x15
         jc  e820_failed_try_e801
-    
+
         add di, cx
         inc word [ards_nr]
         cmp ebx, 0
@@ -52,8 +52,8 @@ section loader vstart=LOADER_BASE_ADDR
 e820_failed_try_e801:
     mov ax, 0xe801
     int 0x15
-    jc  e801_failed_go_88        
-;below 15MB        
+    jc  e801_failed_go_88
+;below 15MB
     mov cx, 0x400
     mul cx
     shl edx, 16
@@ -145,11 +145,11 @@ p_mode_start:
 ;==2==
     mov eax, PAGE_DIR_TABLE_POS
     mov cr3, eax
-;==3==    
+;==3==
     mov eax, cr0
     or eax, 0x80000000
     mov cr0, eax
-;重新讀取分頁下的 gdt    
+;重新讀取分頁下的 gdt
     lgdt [gdt_ptr]
 ;show a V
     mov byte[gs:160], 'V'
@@ -211,7 +211,27 @@ read_disk:
         in ax, dx
         mov [bx], ax
         add bx, 2
+
+        ; TODO: our hash function
+
         loop go_on_read
+
+    ; TODO: our checkpoint
+    ; size = 20
+    mov ax, di ; di = size
+    mov dx, 256
+    mul dx ; ax = size * 256
+    mov dx, 2
+    mul dx ; ax = size * 256 * 2
+    sub bx, ax ; bx = KERNEL_ADDR
+    mov dx, 8704
+    add bx, dx ; bx = KERNEL_ADDR + 17 * 512 = HASH_ADDR
+
+    mov eax, DWORD [bx]
+    mov ecx, 0xdeadbeef
+    cmp eax, ecx
+    jne error_hlt
+
     ret
 
 
@@ -239,10 +259,10 @@ create_pde:
     sub eax, 0x1000
     mov [PAGE_DIR_TABLE_POS + 4092], eax
 
-;每個 PTE 表 4k 實體對應，1M／4k＝256  
+;每個 PTE 表 4k 實體對應，1M／4k＝256
     mov ecx, 256
-    mov esi, 0 
-    mov edx, PG_US_U | PG_RW_W | PG_P 
+    mov esi, 0
+    mov edx, PG_US_U | PG_RW_W | PG_P
 create_pte:
     mov [ebx+esi*4], edx
     add edx, 4096
@@ -264,7 +284,7 @@ create_kernel_pde:
 
 ;--------GDT--------
 ;第0個不可用
-GDT_BASE:   
+GDT_BASE:
     dd 0x00000000
     dd 0x00000000
 
@@ -274,18 +294,18 @@ GDT_DESC:
     dd DESC_CODE_HIGH4
 
 ;平坦模型下的 ds，ss
-DATA_STACK_DESC:    
+DATA_STACK_DESC:
     dd  0x0000ffff
     dd  DESC_DATA_HIGH4
 
 ;文字模式顯卡的記憶體位置 0xb8000~0xbffff ,((0xbffff-0xb8000)+1)/4-1 = 7
-VIDEO_DESC:    
+VIDEO_DESC:
     dd  0x80000007
     dd  DESC_VIDEO_HIGH4
 
 GDT_END:
 
-gdt_ptr:     
+gdt_ptr:
     dw  GDT_LIMIT
     dd  GDT_BASE
 
@@ -293,5 +313,5 @@ gdt_ptr:
 ards_buf times 200 db 0
 ards_nr dw 0
 
-loadermsg: 
+loadermsg:
     db '2 loader in real.'
