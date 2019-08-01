@@ -3,4 +3,7 @@ bochsrc
 genhash
 bochsrc
 hash
-build/loader.bin
+build/*
+genKernelSize
+kernelSize
+kernel_size

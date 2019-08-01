@@ -5,12 +5,14 @@ CFLAGS=-fno-builtin -fno-stack-protector -O2
 .PHONY: hash
 
 all:img
-img:asm hash
-	cp -f hd60M.img.bak hd60M.img
+img:asm hash kernelSize
+	# cp -f hd60M.img.bak hd60M.img
 	dd if=$(BUILD_DIR)/mbr.bin of=hd60M.img count=1 bs=512 conv=notrunc
 	dd if=$(BUILD_DIR)/loader.bin of=hd60M.img bs=512 count=4 seek=1 conv=notrunc
 	dd if=$(BUILD_DIR)/kernel.bin of=hd60M.img bs=512 count=200 seek=5 conv=notrunc
-	dd if=hash of=hd60M.img bs=512 count=6 seek=22 conv=notrunc
+	dd if=hash of=hd60M.img bs=512 count=1 seek=22 conv=notrunc
+	dd if=kernelSize of=hd60M.img bs=512 count=1 seek=23 conv=notrunc
+
 
 asm:
 	nasm -I include/ -o $(BUILD_DIR)/mbr.bin mbr.S
@@ -24,3 +26,6 @@ clean:
 hash:
 	gcc genhash.c -o genhash
 	./genhash > hash
+kernelSize:
+	gcc genKernelSize.c -o genKernelSize
+	./genKernelSize > kernelSize

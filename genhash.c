@@ -1,6 +1,7 @@
 #include <stdlib.h> 
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 
 unsigned int myhash(unsigned char *str, int want_hash_size)
 {
@@ -18,12 +19,12 @@ unsigned int myhash(unsigned char *str, int want_hash_size)
 int main(){
 	FILE *fp;
 	fpos_t pos;
-	int want_hash_size = 10240;
-	unsigned char buff[want_hash_size];
-	const char *filename = "build/kernel.bin";
-	int fileLen=0;
 
-	memset(buff,0,want_hash_size);
+	const char *filename = "build/kernel.bin";
+	struct stat st;
+    stat(filename, &st);
+    unsigned int fileLen = st.st_size;
+	unsigned char buff[fileLen];
 
 	//read start from 0x00
 	pos.__pos = 0x00;
@@ -31,13 +32,9 @@ int main(){
 	if(!fp)
 		return 1;
 
-	while(!feof(fp)) { 
-        fread(&buff[fileLen], sizeof(char), 1, fp);
-        // printf("%02X", buff[fileLen]);
-        fileLen++;  
-    } 
+	fread(buff, sizeof(char), fileLen, fp);
 
-	unsigned int hash = myhash(buff,want_hash_size);
+	unsigned int hash = myhash(buff,fileLen);
 
 	printf("%c%c%c%c",((char*)&hash)[0],((char*)&hash)[1],((char*)&hash)[2],((char*)&hash)[3]);
 

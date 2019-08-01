@@ -210,50 +210,38 @@ read_disk:
 
     push edi
 
-    ; djb2 hash initial value
-    mov edi, 5381
-    ; 0x7b5
+    ;0x7b0
     go_on_read:
         in ax, dx
         mov [bx], ax
         add bx, 2
 
-        ; djb2 hash function
-        push eax
-        push ebx
-        push ecx
-        push edx
-
-        mov ebx, edi
-        sal edi, 5
-        add edi, ebx    ; edi = edi * 33
-        movzx ecx, al
-        add edi, ecx    ; edi = edi + al
-
-        mov ebx, edi
-        sal edi, 5
-        add edi, ebx    ; edi = edi * 33
-        movzx ecx, ah
-        add edi, ecx    ; edi = edi + ah
-
-        pop edx
-        pop ecx
-        pop ebx
-        pop eax
-
         loop go_on_read
-    ;0x7e1
+
+    mov si, KERNEL_BASE_ADDR
+    add si, 9216 ; si = KERNEL_BASE_ADDR + 512 * 18 = kernel size addr
+    mov ecx, dword[si] ; ecx = kernel size
+
+    ; djb2 hash initial value
+    mov edi, 5381
+    mov si, KERNEL_BASE_ADDR
+    djb2_hash:
+        mov dl, byte[si]
+        
+        mov ebx, edi
+        sal edi, 5
+        add edi, ebx    ; edi = edi * 33
+        movzx edx, dl
+        add edi, edx    ; edi = edi + al
+
+        add si, 1
+        loop djb2_hash
+    
     mov ecx, edi ; ecx = hash
 
     pop edi
     ; TODO: our checkpoint
-    ; size = 20
-    mov ax, di ; di = size
-    mov dx, 256
-    mul dx ; ax = size * 256
-    mov dx, 2
-    mul dx ; ax = size * 256 * 2
-    sub bx, ax ; bx = KERNEL_ADDR
+    mov bx, KERNEL_BASE_ADDR
     mov dx, 8704
     add bx, dx ; bx = KERNEL_ADDR + 17 * 512 = HASH_ADDR
 
