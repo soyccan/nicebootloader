@@ -1,6 +1,7 @@
 #include <stdlib.h> 
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include <sys/stat.h>
 
 unsigned int myhash(unsigned char *str, int want_hash_size)
@@ -17,12 +18,23 @@ unsigned int myhash(unsigned char *str, int want_hash_size)
 }
 
 uint64_t power(uint64_t a, uint64_t k, uint64_t N) {
-  uint64_t p=1, i;
-  for (i=1; i<=k; i++) {
-        p = (p*a)%N;
-      }
-  return p;
+	uint64_t p=1, i;
+	for (i=1; i<=k; i++) {
+		p = (p*a)%N;
+	}
+	return p;
 }
+uint64_t powMod(uint64_t a, uint64_t b, uint64_t n) {
+	uint64_t x = 1, y = a;
+	while (b > 0) {
+		if (b % 2 == 1)
+			x = (x * y) % n;
+		y = (y * y) % n; // Squaring the base
+		b /= 2;
+	}
+	return x % n;
+}
+
 
 int main(){
 	FILE *fp;
@@ -30,8 +42,8 @@ int main(){
 
 	const char *filename = "build/kernel.bin";
 	struct stat st;
-    stat(filename, &st);
-    unsigned int fileLen = st.st_size;
+	stat(filename, &st);
+	unsigned int fileLen = st.st_size;
 	unsigned char buff[fileLen];
 
 	//read start from 0x00
@@ -43,13 +55,9 @@ int main(){
 	fread(buff, sizeof(char), fileLen, fp);
 
 	unsigned int hash = myhash(buff,fileLen);
-    /* printf("%u\n", hash); */
-	//printf("%c%c%c%c",((char*)&hash)[0],((char*)&hash)[1],((char*)&hash)[2],((char*)&hash)[3]);
-    
-    /* Hash encryption */
-     unsigned int cipher = powMod(12, 5, 323); // p=65521, q=65537, e=4293918721, d=4293918722
-     unsigned int des = powMod(cipher, 173, 323);
-    printf("%u %u\n", cipher, des);
-	fclose(fp);
 
+	/* Hash encryption */
+	unsigned int cipher = powMod(12, 5, 323); // p=65521, q=65537, e=4293918721, d=4293918722
+	printf("%u\n", cipher);
+	fclose(fp);
 }

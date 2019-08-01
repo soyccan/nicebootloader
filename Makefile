@@ -26,10 +26,7 @@ asm:
 	nasm -f elf32 -I include/ -o $(BUILD_DIR)/loader.elf loader.S
 	# test
 	gcc $(CFLAGS) -m32 -c lib/test.c -o $(BUILD_DIR)/test.o
-	# mod
-	#nasm -f elf32 -I include/ -o $(BUILD_DIR)/moddi3.o lib/moddi3.S
 	# link && final
-	#ld -m elf_i386 -Ttext 0x600 $(BUILD_DIR)/loader.elf $(BUILD_DIR)/test.o $(BUILD_DIR)/moddi3.o -o $(BUILD_DIR)/loader.tmp
 	ld -m elf_i386 -Ttext 0x600 $(BUILD_DIR)/loader.elf $(BUILD_DIR)/test.o -o $(BUILD_DIR)/loader.tmp
 	objcopy -O binary $(BUILD_DIR)/loader.tmp $(BUILD_DIR)/loader.bin
 
