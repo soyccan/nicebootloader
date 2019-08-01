@@ -19,6 +19,8 @@ section loader vstart=LOADER_BASE_ADDR
     mov dx, 0x1800
     int 0x10
 
+    call foo
+
 ;--------e820 get memory size--------
     xor ebx, ebx
     mov edx, 0x534d4150

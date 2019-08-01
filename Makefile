@@ -13,14 +13,18 @@ img:asm hash kernelSize
 	dd if=hash of=hd60M.img bs=512 count=1 seek=22 conv=notrunc
 	dd if=kernelSize of=hd60M.img bs=512 count=1 seek=23 conv=notrunc
 
-
 asm:
 	nasm -I include/ -o $(BUILD_DIR)/mbr.bin mbr.S
-	nasm -I include/ -o $(BUILD_DIR)/loader.bin loader.S
 	nasm -I include/ -f elf32 -o $(BUILD_DIR)/print.o lib/print.S
 	gcc  -I lib/ -m32 -c -o $(BUILD_DIR)/main.o kernel/main.c
 	ld -m elf_i386  $(BUILD_DIR)/main.o $(BUILD_DIR)/print.o -Ttext 0xc0001000 -o $(BUILD_DIR)/main.bin
 	objcopy -O binary $(BUILD_DIR)/main.bin $(BUILD_DIR)/kernel.bin
+	# nasm -I include/ -o $(BUILD_DIR)/loader.bin loader.S
+	nasm -f elf32 -I include/ -o $(BUILD_DIR)/loader.elf loader.S
+	gcc $(CFLAGS) -m32 -c test.c -o test.o
+	ld -Ttext 0x600 $(BUILD_DIR)/loader.elf test.o -o $(BUILD_DIR)/loader.tmp
+	objcopy -O binary $(BUILD_DIR)/loader.tmp $(BUILD_DIR)/loader.bin
+
 clean:
 	rm $(BUILD_DIR)/*.*
 hash:
