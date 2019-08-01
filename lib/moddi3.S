@@ -1,120 +1,149 @@
-###################################
-# 
-#  Copyright (C) 2009-2019 Free Software Foundation, Inc.
-#
-#  Contributed by Michael Eager <eager@eagercon.com>.
-#
-#  This file is free software; you can redistribute it and/or modify it
-#  under the terms of the GNU General Public License as published by the
-#  Free Software Foundation; either version 3, or (at your option) any
-#  later version.
-#
-#  GCC is distributed in the hope that it will be useful, but WITHOUT
-#  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-#  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
-#  License for more details.
-#
-#  Under Section 7 of GPL version 3, you are granted additional
-#  permissions described in the GCC Runtime Library Exception, version
-#  3.1, as published by the Free Software Foundation.
-#
-#  You should have received a copy of the GNU General Public License and
-#  a copy of the GCC Runtime Library Exception along with this program;
-#  see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
-#  <http://www.gnu.org/licenses/>. 
-#
-#  modsi3.S
-# 
-#  modulo operation for 64 bit integers.
-# 
-#######################################
+#ifdef __i386__
 
+.text
+.balign 4
+DEFINE_COMPILERRT_FUNCTION(__moddi3)
 
-/* An executable stack is *not* required for these functions.  */
-#ifdef __linux__
-.section .note.GNU-stack,"",%progbits
-.previous
-#endif
+// This is currently implemented by wrapping the unsigned modulus up in an absolute
+// value.  This could certainly be improved upon.
 
-.globl__moddi3
-.ent__moddi3
-__moddi3:
-.framer1,0,r15
+	pushl		%esi
+	movl	 20(%esp),			%edx	// high word of b
+	movl	 16(%esp),			%eax	// low word of b
+	movl		%edx,			%ecx
+	sarl		$31,			%ecx	// (b < 0) ? -1 : 0
+	xorl		%ecx,			%eax
+	xorl		%ecx,			%edx	// EDX:EAX = (b < 0) ? not(b) : b
+	subl		%ecx,			%eax
+	sbbl		%ecx,			%edx	// EDX:EAX = abs(b)
+	movl		%edx,		 20(%esp)
+	movl		%eax,		 16(%esp)	// store abs(b) back to stack
 
-#Change the stack pointer value and Save callee saved regs
-addikr1,r1,-24
-swir25,r1,addikr10
-swir26,r1,4
-swir27,r1,8# used for sign
-swir28,r1,12# used for loop count
-swir29,r1,16# Used for div value High
-swir30,r1,20# Used for div value Low
+	movl	 12(%esp),			%edx	// high word of b
+	movl	  8(%esp),			%eax	// low word of b
+	movl		%edx,			%ecx
+	sarl		$31,			%ecx	// (a < 0) ? -1 : 0
+	xorl		%ecx,			%eax
+	xorl		%ecx,			%edx	// EDX:EAX = (a < 0) ? not(a) : a
+	subl		%ecx,			%eax
+	sbbl		%ecx,			%edx	// EDX:EAX = abs(a)
+	movl		%edx,		 12(%esp)
+	movl		%eax,		  8(%esp)	// store abs(a) back to stack
+	movl		%ecx,			%esi	// set aside sign of a
 
-#Check for Zero Value in the divisor/dividend
-ORr9,r5,r6# Check for the op1 being zero
-BEQIDr9,$LaResult_Is_Zero# Result is zero
-ORr9,r7,r8# Check for the dividend being zero
-BEQIr9,$LaDiv_By_Zero        # Div_by_Zero   # Division Error
-BGEIdr5,$La1_Pos 
-XORr27,r5,r7# Get the sign of the result
-RSUBIr6,r6,0# Make dividend positive
-RSUBICr5,r5,0# Make dividend positive
-$La1_Pos:
-BGEIr7,$La2_Pos
-RSUBIr8,r8,0# Make Divisor Positive
-RSUBICr9,r9,0# Make Divisor Positive
-$La2_Pos:
-ADDIKr4,r0,0# Clear mod low
-ADDIKr3,r0,0                        # Clear mod haveigh
-ADDIKr29,r0,0# clear div high
-ADDIKr30,r0,0# clear div loww
-ADDIKr28,r0,64# Initialize the loop count
-# First part try to find the first '1' in the r5/r6
-$LaDIV1:
-ADDr6,r6,r6
-ADDCr5,r5,r5# left shift logical r5
-BGEIDr5,$LaDIV1
-ADDIKr28,r28,-1
-$LaDIV12:
-ADDr6,r6,r6
-ADDCr5,r5,r5# left shift logical r5/r6 get the '1'                   into the Carry
-ADDCr4,r4,r4# Move that bit into the Mod register
-ADDIKr28DCr3,r3,r3# Move carry into high mod register
-rsubr18,r7,r3# Compare the High Parts of Mod and Divisor
-bneir18,$L_High_EQ
-rsubr18,r6,bneir18r4# Compare Low Parts only if Mod[h] == Divisor[h]
-$L_High_EQ:
-rSUBr26,r8,r4# Subtract divisor[L] from Mod[L]
-rsubcr25,r7,r3# Subtract divisor[H] from Mod[H]
-BLTir25,$LaMOD_TOO_SMALL
-ORr3,r0,r25# move r25 to mod [h]
-ORr4,r0,r26# move r26 to mod [l]
-ADDIr30,r30,1
-ADDIKr28DCr29,r29,r0
-$LaMOD_TOO_SMALL:
-ADDIKr28,r28,-1
-BEQir28,$LaLOOP_END
-ADDr30,r30,r30# Shift in the '1' into div [low]
-ADDCr29,r29,r29# Move the carry generated into high
-BRI$LaDIV2   # Div2
-$LaLOOP_END:
-BGEIr27,$LaRETURN_HERE
-rsubir30,r30,0
-rsubcr29,r29,r0
-BRI$LaResult_Is_ZeroETURN_HERE
-$LaDiv_By_Zero:
-$LaResult_Is_Zero:
-orr29,r0,r0# set resultt to 0 [High]
-orr30,r0,r0# set result to 0 [Low]
-$LaRETURN_HERE:
-# RSUBICr5estore values of CSRs and that of r29 and the divisor and the dividend
+	pushl		%ebx
+	movl	 24(%esp),			%ebx	// Find the index i of the leading bit in b.
+	bsrl		%ebx,			%ecx	// If the high word of b is zero, jump to
+	jz			9f						// the code to handle that special case [9].
 
-lwir25,r1,0
-lwir26,r1,4
-lwir27,r1,8
-lwir28,r1,12
-lwir29,r1,16
-lwir30,r1,20
-rtsdr15,8
-addik r1,r1,24
-.end __moddi3)
+	// High word of b is known to be non-zero on this branch
+
+	movl	 20(%esp),			%eax	// Construct bhi, containing bits [1+i:32+i] of b
+
+	shrl		%cl,			%eax	// Practically, this means that bhi is given by:
+	shrl		%eax					//
+	notl		%ecx					//		bhi = (high word of b) << (31 - i) |
+	shll		%cl,			%ebx	//			  (low word of b) >> (1 + i)
+	orl			%eax,			%ebx	//
+	movl	 16(%esp),			%edx	// Load the high and low words of a, and jump
+	movl	 12(%esp),			%eax	// to [2] if the high word is larger than bhi
+	cmpl		%ebx,			%edx	// to avoid overflowing the upcoming divide.
+	jae			2f
+
+	// High word of a is greater than or equal to (b >> (1 + i)) on this branch
+
+	divl		%ebx					// eax <-- qs, edx <-- r such that ahi:alo = bs*qs + r
+
+	pushl		%edi
+	notl		%ecx
+	shrl		%eax
+	shrl		%cl,			%eax	// q = qs >> (1 + i)
+	movl		%eax,			%edi
+	mull	 24(%esp)					// q*blo
+	movl	 16(%esp),			%ebx
+	movl	 20(%esp),			%ecx	// ECX:EBX = a
+	subl		%eax,			%ebx
+	sbbl		%edx,			%ecx	// ECX:EBX = a - q*blo
+	movl	 28(%esp),			%eax
+	imull		%edi,			%eax	// q*bhi
+	subl		%eax,			%ecx	// ECX:EBX = a - q*b
+
+	jnc			1f						// if positive, this is the result.
+	addl	 24(%esp),			%ebx	// otherwise
+	adcl	 28(%esp),			%ecx	// ECX:EBX = a - (q-1)*b = result
+1:	movl		%ebx,			%eax
+	movl		%ecx,			%edx
+
+	addl		%esi,			%eax	// Restore correct sign to result
+	adcl		%esi,			%edx
+	xorl		%esi,			%eax
+	xorl		%esi,			%edx
+	popl		%edi					// Restore callee-save registers
+	popl		%ebx
+	popl		%esi
+	retl								// Return
+
+2:	// High word of a is greater than or equal to (b >> (1 + i)) on this branch
+
+	subl		%ebx,			%edx	// subtract bhi from ahi so that divide will not
+	divl		%ebx					// overflow, and find q and r such that
+										//
+										//		ahi:alo = (1:q)*bhi + r
+										//
+										// Note that q is a number in (31-i).(1+i)
+										// fix point.
+
+	pushl		%edi
+	notl		%ecx
+	shrl		%eax
+	orl			$0x80000000,	%eax
+	shrl		%cl,			%eax	// q = (1:qs) >> (1 + i)
+	movl		%eax,			%edi
+	mull	 24(%esp)					// q*blo
+	movl	 16(%esp),			%ebx
+	movl	 20(%esp),			%ecx	// ECX:EBX = a
+	subl		%eax,			%ebx
+	sbbl		%edx,			%ecx	// ECX:EBX = a - q*blo
+	movl	 28(%esp),			%eax
+	imull		%edi,			%eax	// q*bhi
+	subl		%eax,			%ecx	// ECX:EBX = a - q*b
+
+	jnc			3f						// if positive, this is the result.
+	addl	 24(%esp),			%ebx	// otherwise
+	adcl	 28(%esp),			%ecx	// ECX:EBX = a - (q-1)*b = result
+3:	movl		%ebx,			%eax
+	movl		%ecx,			%edx
+
+	addl		%esi,			%eax	// Restore correct sign to result
+	adcl		%esi,			%edx
+	xorl		%esi,			%eax
+	xorl		%esi,			%edx
+	popl		%edi					// Restore callee-save registers
+	popl		%ebx
+	popl		%esi
+	retl								// Return
+
+9:	// High word of b is zero on this branch
+
+	movl	 16(%esp),			%eax	// Find qhi and rhi such that
+	movl	 20(%esp),			%ecx	//
+	xorl		%edx,			%edx	//		ahi = qhi*b + rhi	with	0 ≤ rhi < b
+	divl		%ecx					//
+	movl		%eax,			%ebx	//
+	movl	 12(%esp),			%eax	// Find rlo such that
+	divl		%ecx					//
+	movl		%edx,			%eax	//		rhi:alo = qlo*b + rlo  with 0 ≤ rlo < b
+	popl		%ebx					//
+	xorl		%edx,			%edx	// and return 0:rlo
+
+	addl		%esi,			%eax	// Restore correct sign to result
+	adcl		%esi,			%edx
+	xorl		%esi,			%eax
+	xorl		%esi,			%edx
+	popl		%esi
+	retl								// Return
+END_COMPILERRT_FUNCTION(__moddi3)
+
+#endif // __i386__
+
+NO_EXEC_STACK_DIRECTIVE

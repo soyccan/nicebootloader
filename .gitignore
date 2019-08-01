@@ -4,6 +4,7 @@ genhash
 bochsrc
 hash
 build/*
+lib/test
 genKernelSize
 kernelSize
 kernel_size
