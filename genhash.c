@@ -16,6 +16,14 @@ unsigned int myhash(unsigned char *str, int want_hash_size)
 	return hash;
 }
 
+uint64_t power(uint64_t a, uint64_t k, uint64_t N) {
+  uint64_t p=1, i;
+  for (i=1; i<=k; i++) {
+        p = (p*a)%N;
+      }
+  return p;
+}
+
 int main(){
 	FILE *fp;
 	fpos_t pos;
@@ -35,9 +43,13 @@ int main(){
 	fread(buff, sizeof(char), fileLen, fp);
 
 	unsigned int hash = myhash(buff,fileLen);
-
-	printf("%c%c%c%c",((char*)&hash)[0],((char*)&hash)[1],((char*)&hash)[2],((char*)&hash)[3]);
-
+    /* printf("%u\n", hash); */
+	//printf("%c%c%c%c",((char*)&hash)[0],((char*)&hash)[1],((char*)&hash)[2],((char*)&hash)[3]);
+    
+    /* Hash encryption */
+     unsigned int cipher = powMod(12, 5, 323); // p=65521, q=65537, e=4293918721, d=4293918722
+     unsigned int des = powMod(cipher, 173, 323);
+    printf("%u %u\n", cipher, des);
 	fclose(fp);
 
 }

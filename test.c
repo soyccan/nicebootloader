@@ -1,4 +1,4 @@
-
+#include <linux/module.h>
 extern long long foo(){
     long long x = 1, y = 1007516271, b = 2732493731;  
     while (b > 0) {

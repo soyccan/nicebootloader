@@ -1,5 +1,5 @@
 %include "boot.inc"
-
+extern foo
 LOADER_STACK_TOP equ LOADER_BASE_ADDR
 
 ;--------GDT 相關常數--------

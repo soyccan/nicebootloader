@@ -1,6 +1,8 @@
 BUILD_DIR=./build
 LIB=-I include/
-CFLAGS=-fno-builtin -fno-stack-protector -O2
+#CFLAGS=-fno-builtin -fno-stack-protector -O2
+CFLAGS=-fno-builtin -fno-stack-protector -fno-pie -O2
+
 
 .PHONY: hash
 
