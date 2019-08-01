@@ -23,11 +23,11 @@ asm:
 	ld -m elf_i386  $(BUILD_DIR)/main.o $(BUILD_DIR)/print.o -Ttext 0xc0001000 -o $(BUILD_DIR)/main.bin
 	objcopy -O binary $(BUILD_DIR)/main.bin $(BUILD_DIR)/kernel.bin
 	# loader
-	nasm -f elf32 -I include/ -o $(BUILD_DIR)/loader.elf loader.S
+	nasm -f elf32   -I include/ -o $(BUILD_DIR)/loader.elf loader.S
 	# test
 	gcc $(CFLAGS) -m32 -c lib/test.c -o $(BUILD_DIR)/test.o
 	# link && final
-	ld -m elf_i386 -Ttext 0x600 $(BUILD_DIR)/loader.elf $(BUILD_DIR)/test.o -o $(BUILD_DIR)/loader.tmp
+	ld -m elf_i386 -T linkerScript $(BUILD_DIR)/loader.elf $(BUILD_DIR)/test.o -o $(BUILD_DIR)/loader.tmp
 	objcopy -O binary $(BUILD_DIR)/loader.tmp $(BUILD_DIR)/loader.bin
 
 clean:
