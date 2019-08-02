@@ -9,7 +9,6 @@ GDT_LIMIT   equ  GDT_SIZE-1
 ;--------記憶體大小記錄在 0x510--------
 total_mem_bytes equ 0x510
 
-; section loader vstart=LOADER_BASE_ADDR
 
 [BITS 16]
 ;以16位元指令的格式組譯指令
@@ -17,13 +16,21 @@ total_mem_bytes equ 0x510
 ;--------列印字串--------
     mov sp, LOADER_BASE_ADDR
     mov bp, loadermsg
-    mov cx, 17
-    mov ax, 0x1301
-    mov bx, 0x001f
-    mov dx, 0x1800
-    int 0x10
+    mov ax, 0x1301  ;print and move cursor 
+    mov bx, 0x000f  ;black background, white char
+    mov dx, 0x1800 ;row, column
+
+    mov cx,19   ;loop time
+    boot_animate:
+        push cx
+        mov cx, 52  ;length
+        int 0x10
+        add bp,52
+        pop cx
+        loop boot_animate
 
 ;--------e820 get memory size--------
+    mov bx, 0x001f
     xor ebx, ebx
     mov edx, 0x534d4150
     mov di, ards_buf
@@ -214,7 +221,7 @@ read_disk:
 
     push edi
 
-    ;0x7b0
+    ;0x7bd
     go_on_read:
         in ax, dx
         mov [bx], ax
@@ -240,7 +247,7 @@ read_disk:
         add si, 1
         loop djb2_hash
 
-    ; 0x7e6
+    ; 0x7f3
     mov edx, 0
     mov eax, edi
     mov ecx, 4294049777
@@ -349,4 +356,193 @@ ards_buf times 200 db 0
 ards_nr dw 0
 
 loadermsg:
-    db '2 loader in real.'
+db `                         .cccc;;cc;\';c.            \n`
+db `                      .,:dkdc:;;:c:,:d:.           \n`
+db `                     .loc\'.,cc::c:::,..;:.         \n`
+db `                   .cl;....;dkdccc::,...c;         \n`
+db `                  .c:,\';:\'..ckc\',;::;....;c.       \n`
+db `                .c:\'.,dkkoc:ok:;llllc,,c,\';:.      \n`
+db `               .;c,\';okkkkkkkk:;lllll,:kd;.;:,.    \n`
+db `               co..:kkkkkkkkkk:;llllc\':kkc..oNc    \n`
+db `             .cl;.,oxkkkkkkkkkc,:cll;,okkc\'.cO;    \n`
+db `             ;k:..ckkkkkkkkkkkl..,;,.;xkko:\',l\'    \n`
+db `            .,...\';dkkkkkkkkkkd;.....ckkkl\'.cO;    \n`
+db `         .,,:,.;oo:ckkkkkkkkkkkdoc;;cdkkkc..cd,    \n`
+db `      .cclo;,ccdkkl;llccdkkkkkkkkkkkkkkkd,.c;      \n`
+db `     .lol:;;okkkkkxooc::coodkkkkkkkkkkkko\'.oc      \n`
+db `   .c:\'..lkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkd,.oc      \n`
+db `  .lo;,:cdkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkd,.c;      \n`
+db `,dx:..;lllllllllllllllllllllllllllllllllc\'...      \n`
+db `cNO;........................................       \n`
+db `                                                   \n`
+db `                .ckx;\'........\':c.                 \n`
+db `             .,:c:::::oxxocoo::::,\',.              \n`
+db `            .odc\'..:lkkoolllllo;..;d,              \n`
+db `            ;c..:o:..;:..\',;\'.......;.             \n`
+db `           ,c..:0Xx::o:.,cllc:,\'::,.,c.            \n`
+db `           ;c;lkXKXXXXl.;lllll;lKXOo;\':c.          \n`
+db `         ,dc.oXXXXXXXXl.,lllll;lXXXXx,c0:          \n`
+db `         ;Oc.oXXXXXXXXo.\':ll:;\'oXXXXO;,l\'          \n`
+db `         \'l;;kXXXXXXXXd\'.\'::\'..dXXXXO;,l\'          \n`
+db `         \'l;:0XXXXXXXX0x:...,:o0XXXXx,:x,          \n`
+db `         \'l;;kXXXXXXXXXKkol;oXXXXXXXO;oNc          \n`
+db `        ,c\'..ckk0XXXXXXXXXX00XXXXXXX0:;o:.         \n`
+db `      .\':;..:do::ooookXXXXXXXXXXXXXXXo..c;         \n`
+db `    .\',\',:co0XX0kkkxxOXXXXXXXXXXXXXXXOc..;l.       \n`
+db `  .:;\'..oXXXXXXXXXXXXXXXXXXXXXXXXXXXXXko;\';:.      \n`
+db `.ldc..:oOXKXXXXXXKXXKXXXXXXXXXXXXXXXXXXXo..oc      \n`
+db `:0o...:dxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxo,.:,      \n`
+db `cNo........................................;\'      \n`
+db `                                                   \n`
+db `            .cc;.  ...  .;c.                       \n`
+db `         .,,cc:cc:lxxxl:ccc:;,.                    \n`
+db `        .lo;...lKKklllookl..cO;                    \n`
+db `      .cl;.,:\'.okl;..\'\'.;,..\';:.                   \n`
+db `     .:o;;dkd,.ll..,cc::,..,\'.;:,.                 \n`
+db `     co..lKKKkokl.\':lloo;\'\'ol..;dl.                \n`
+db `   .,c;.,xKKKKKKo.\':llll;.\'oOxl,.cl,.              \n`
+db `   cNo..lKKKKKKKo\'\';llll;;okKKKl..oNc              \n`
+db `   cNo..lKKKKKKKko;\':c:,\'lKKKKKo\'.oNc              \n`
+db `   cNo..lKKKKKKKKKl.....\'dKKKKKxc,l0:              \n`
+db `   .c:\'.lKKKKKKKKKk;....lKKKKKKo\'.oNc              \n`
+db `     ,:.\'oxOKKKKKKKOxxxxOKKKKKKxc,;ol:.            \n`
+db `     ;c..\'\':oookKKKKKKKKKKKKKKKKKk:.\'clc.          \n`
+db `   ,xl\'.,oxo;\'\';oxOKKKKKKKKKKKKKKKOxxl:::;,.       \n`
+db `  .dOc..lKKKkoooookKKKKKKKKKKKKKKKKKKKxl,;ol.      \n`
+db `  cx,\';okKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKl..;lc.    \n`
+db `  co..:dddddddddddddddddddddddddddddddddl::\',::.   \n`
+db `  co...........................................    \n`
+db `                                                   \n`
+db `           .ccccccc.                               \n`
+db `      .,,,;cooolccoo;;,,.                          \n`
+db `     .dOx;..;lllll;..;xOd.                         \n`
+db `   .cdo;\',loOXXXXXkll;\';odc.                       \n`
+db `  ,ol:;c,\':oko:cccccc,...ckl.                      \n`
+db `  ;c.;kXo..::..;c::\'.......oc                      \n`
+db `,dc..oXX0kk0o.\':lll;..cxxc.,ld,                    \n`
+db `kNo.\'oXXXXXXo\',:lll;..oXXOo;cOd.                   \n`
+db `KOc;oOXXXXXXo.\':lol;..dXXXXl\';xc                   \n`
+db `Ol,:k0XXXXXX0c.,clc\'.:0XXXXx,.oc                   \n`
+db `KOc;dOXXXXXXXl..\';\'..lXXXXXo..oc                   \n`
+db `dNo..oXXXXXXXOx:..\'lxOXXXXXk,.:; ..                \n`
+db `cNo..lXXXXXXXXXOolkXXXXXXXXXkl,..;:\';.             \n`
+db `.,;\'.,dkkkkk0XXXXXXXXXXXXXXXXXOxxl;,;,;l:.         \n`
+db `  ;c.;:\'\'\'\'\':doOXXXXXXXXXXXXXXXXXXOdo;\';clc.       \n`
+db `  ;c.lOdood:\'\'\'oXXXXXXXXXXXXXXXXXXXXXk,..;ol.      \n`
+db `  \';.:xxxxxocccoxxxxxxxxxxxxxxxxxxxxxxl::\'.\';;.    \n`
+db `  \';........................................;l\'    \n`
+db `                                                   \n`
+db `                                                   \n`
+db `        .;:;;,.,;;::,.                             \n`
+db `     .;\':;........\'co:.                            \n`
+db `   .clc;\'\':cllllc::,.\':c.                          \n`
+db `  .lo;;o:coxdllllllc;\'\'::,,.                       \n`
+db `.c:\'.,cl,.\'l:\',,;;\'......cO;                       \n`
+db `do;\';oxoc;:l;;llllc\'.\';;\'.,;.                      \n`
+db `c..ckkkkkkkd,;llllc\'.:kkd;.\':c.                    \n`
+db `\'.,okkkkkkkkc;lllll,.:kkkdl,cO;                    \n`
+db `..;xkkkkkkkkc,ccll:,;okkkkk:,co,                   \n`
+db `..,dkkkkkkkkc..,;,\'ckkkkkkkc;ll.                   \n`
+db `..\'okkkkkkkko,....\'okkkkkkkc,:c.                   \n`
+db `c..ckkkkkkkkkdl;,:okkkkkkkkd,.\',\';.                \n`
+db `d..\':lxkkkkkkkkxxkkkkkkkkkkkdoc;,;\'..\'.,.          \n`
+db `o...\'\';llllldkkkkkkkkkkkkkkkkkkdll;..\'cdo.         \n`
+db `o..,l;\'\'\'\'\'\';dkkkkkkkkkkkkkkkkkkkkdlc,..;lc.       \n`
+db `o..;lc;;;;;;,,;clllllllllllllllllllllc\'..,:c.      \n`
+db `o..........................................;\'      \n`
+db `                                                   \n`
+db `                                                   \n`
+db `           .,,,,,,,,,.                             \n`
+db `         .ckKxodooxOOdcc.                          \n`
+db `      .cclooc\'....\';;cool.                         \n`
+db `     .loc;;;;clllllc;;;;;:;,.                      \n`
+db `   .c:\'.,okd;;cdo:::::cl,..oc                      \n`
+db `  .:o;\';okkx;\';;,\';::;\'....,:,.                    \n`
+db `  co..ckkkkkddkc,cclll;.,c:,:o:.                   \n`
+db `  co..ckkkkkkkk:,cllll;.:kkd,.\':c.                 \n`
+db `.,:;.,okkkkkkkk:,cclll;.ckkkdl;;o:.                \n`
+db `cNo..ckkkkkkkkko,.;loc,.ckkkkkc..oc                \n`
+db `,dd;.:kkkkkkkkkx;..;:,.\'lkkkkko,.:,                \n`
+db `  ;:.ckkkkkkkkkkc.....;ldkkkkkk:.,\'                \n`
+db `,dc..\'okkkkkkkkkxoc;;cxkkkkkkkkc..,;,.             \n`
+db `kNo..\':lllllldkkkkkkkkkkkkkkkkkdcc,.;l.            \n`
+db `KOc,c;\'\'\'\'\'\'\';lldkkkkkkkkkkkkkkkkkc..;lc.          \n`
+db `xx:\':;;;;,.,,...,;;cllllllllllllllc;\'.;od,         \n`
+db `cNo.....................................oc         \n`
+db `                                                   \n`
+db `                                                   \n`
+db `                                                   \n`
+db `                   .ccccccc.                       \n`
+db `               .ccckNKOOOOkdcc.                    \n`
+db `            .;;cc:ccccccc:,:c::,,.                 \n`
+db `         .c;:;.,cccllxOOOxlllc,;ol.                \n`
+db `        .lkc,coxo:;oOOxooooooo;..:,                \n`
+db `      .cdc.,dOOOc..cOd,.\',,;\'....\':l.              \n`
+db `      cNx\'.lOOOOxlldOc..;lll;.....cO;              \n`
+db `     ,do;,:dOOOOOOOOOl\'\':lll;..:d:\'\'c,             \n`
+db `     co..lOOOOOOOOOOOl\'\':lll;.\'lOd,.cd.            \n`
+db `     co.\'dOOOOOOOOOOOo,.;llc,.,dOOc..dc            \n`
+db `     co..lOOOOOOOOOOOOc.\';:,..cOOOl..oc            \n`
+db `   .,:;.\'::lxOOOOOOOOOo:\'...,:oOOOc.\'dc            \n`
+db `   ;Oc..cl\'\':lldOOOOOOOOdcclxOOOOx,.cd.            \n`
+db `  .:;\';lxl\'\'\'\'\':lldOOOOOOOOOOOOOOc..oc             \n`
+db `,dl,.\'cooc:::,....,::coooooooooooc\'.c:             \n`
+db `cNo.................................oc             \n`
+db `                                                   \n`
+db `                                                   \n`
+db `                                                   \n`
+db `                                                   \n`
+db `                        .cccccccc.                 \n`
+db `                  .,,,;;cc:cccccc:;;,.             \n`
+db `                .cdxo;..,::cccc::,..;l.            \n`
+db `               ,do:,,:c:coxxdllll:;,\';:,.          \n`
+db `             .cl;.,oxxc\'.,cc,.\';;;\'...oNc          \n`
+db `             ;Oc..cxxxc\'.,c;..;lll;...cO;          \n`
+db `           .;;\',:ldxxxdoldxc..;lll:\'...\'c,         \n`
+db `           ;c..cxxxxkxxkxxxc\'.;lll:\'\',\'.cdc.       \n`
+db `         .c;.;odxxxxxxxxxxxd;.,cll;.,l:.\'dNc       \n`
+db `        .:,\'\'ccoxkxxkxxxxxxx:..,:;\'.:xc..oNc       \n`
+db `      .lc,.\'lc\':dxxxkxxxxxxxol,...\',lx:..dNc       \n`
+db `     .:,\',coxoc;;ccccoxxxxxxxxo:::oxxo,.cdc.       \n`
+db `  .;\':;.\'oxxxxxc\'\'\'\'\';cccoxxxxxxxxxxxc..oc         \n`
+db `,do:\'..,:llllll:;;;;;;,..,;:lllllllll;..oc         \n`
+db `cNo.....................................oc         \n`
+db `                                                   \n`
+db `                                                   \n`
+db `                                                   \n`
+db `                              .ccccc.              \n`
+db `                         .cc;\'coooxkl;.            \n`
+db `                     .:c:::c:,,,,,;c;;,.\'.         \n`
+db `                   .clc,\',:,..:xxocc;\'..c;         \n`
+db `                  .c:,\';:ox:..:c,,,,,,...cd,       \n`
+db `                .c:\'.,oxxxxl::l:.,loll;..;ol.      \n`
+db `                ;Oc..:xxxxxxxxx:.,llll,....oc      \n`
+db `             .,;,\',:loxxxxxxxxx:.,llll;.,,.\'ld,    \n`
+db `            .lo;..:xxxxxxxxxxxx:.\'cllc,.:l:\'cO;    \n`
+db `           .:;...\'cxxxxxxxxxxxxoc;,::,..cdl;;l\'    \n`
+db `         .cl;\':,\'\';oxxxxxxdxxxxxx:....,cooc,cO;    \n`
+db `     .,,,::;,lxoc:,,:lxxxxxxxxxxxo:,,;lxxl;\'oNc    \n`
+db `   .cdxo;\':lxxxxxxc\'\';cccccoxxxxxxxxxxxxo,.;lc.    \n`
+db `  .loc\'.\'lxxxxxxxxocc;\'\'\'\'\';ccoxxxxxxxxx:..oc      \n`
+db `olc,..\',:cccccccccccc:;;;;;;;;:ccccccccc,.\'c,      \n`
+db `Ol;......................................;l\'       \n`
+db `                                                   \n`
+db `                                                   \n`
+db `                              ,ddoodd,             \n`
+db `                         .cc\' ,ooccoo,\'cc.         \n`
+db `                      .ccldo;...\',,...;oxdc.       \n`
+db `                   .,,:cc;.,\'..;lol;;,\'..lkl.      \n`
+db `                  .dOc\';:ccl;..;dl,.\'\'.....oc      \n`
+db `                .,lc\',cdddddlccld;.,;c::\'..,cc:.   \n`
+db `                cNo..:ddddddddddd;\':clll;,c,\';xc   \n`
+db `               .lo;,clddddddddddd;\':clll;:kc..;\'   \n`
+db `             .,c;..:ddddddddddddd:\';clll,;ll,..    \n`
+db `             ;Oc..\';:ldddddddddddl,.,c:;\';dd;..    \n`
+db `           .\'\'\',:c:,\'cdddddddddddo:,\'\'..\'cdd;..    \n`
+db `         .cdc\';lddd:\';lddddddddddddd;.\';lddl,..    \n`
+db `      .,;::;,cdddddol;;lllllodddddddlcldddd:.\'l;   \n`
+db `     .dOc..,lddddddddlcc:;\'\';cclddddddddddd;;ll.   \n`
+db `   .coc,;::ldddddddddddddlcccc:ldddddddddl:,cO;    \n`
+db `,xl::,..,cccccccccccccccccccccccccccccccc:;\':xx,   \n`
+db `cNd.........................................;lOc   \n`
+db `                                                   \n`
