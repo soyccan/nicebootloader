@@ -12,8 +12,8 @@ img:asm hash kernelSize
 	dd if=$(BUILD_DIR)/mbr.bin of=hd60M.img count=1 bs=512 conv=notrunc
 	dd if=$(BUILD_DIR)/loader.bin of=hd60M.img bs=512 count=4 seek=1 conv=notrunc
 	dd if=$(BUILD_DIR)/kernel.bin of=hd60M.img bs=512 count=200 seek=5 conv=notrunc
-	dd if=hash of=hd60M.img bs=512 count=1 seek=22 conv=notrunc
-	dd if=kernelSize of=hd60M.img bs=512 count=1 seek=23 conv=notrunc
+	#dd if=hash of=hd60M.img bs=512 count=1 seek=22 conv=notrunc
+	#dd if=kernelSize of=hd60M.img bs=512 count=1 seek=23 conv=notrunc
 
 asm:
 	nasm -I include/ -o $(BUILD_DIR)/mbr.bin mbr.S
@@ -27,7 +27,8 @@ asm:
 	# test
 	gcc $(CFLAGS) -m32 -c lib/test.c -o $(BUILD_DIR)/test.o
 	# link && final
-	ld -m elf_i386 -Ttext 0x600 $(BUILD_DIR)/loader.elf $(BUILD_DIR)/test.o -o $(BUILD_DIR)/loader.tmp
+	#ld -m elf_i386 -Ttext 0x600 $(BUILD_DIR)/loader.elf $(BUILD_DIR)/test.o -o $(BUILD_DIR)/loader.tmp 	
+	ld -m elf_i386 -T test.ld  -o $(BUILD_DIR)/loader.tmp 	
 	objcopy -O binary $(BUILD_DIR)/loader.tmp $(BUILD_DIR)/loader.bin
 
 clean:
