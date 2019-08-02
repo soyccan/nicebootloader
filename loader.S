@@ -10,6 +10,7 @@ GDT_LIMIT   equ  GDT_SIZE-1
 total_mem_bytes equ 0x510
 
 section loader vstart=LOADER_BASE_ADDR
+[BITS 16]
 ;--------列印字串--------
     mov sp, LOADER_BASE_ADDR
     mov bp, loadermsg
@@ -18,8 +19,6 @@ section loader vstart=LOADER_BASE_ADDR
     mov bx, 0x001f
     mov dx, 0x1800
     int 0x10
-
-    call foo
 
 ;--------e820 get memory size--------
     xor ebx, ebx
@@ -211,6 +210,7 @@ read_disk:
     mov dx, 0x1f0
 
     push edi
+    call foo
 
     ;0x7b0
     go_on_read:
