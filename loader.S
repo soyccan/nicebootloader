@@ -211,9 +211,9 @@ read_disk:
     mov dx, 0x1f0
 
     push edi
-    call foo
 
     ;0x7b0
+
     go_on_read:
         in ax, dx
         mov [bx], ax
@@ -246,9 +246,12 @@ read_disk:
     ; TODO: our checkpoint
     mov bx, KERNEL_BASE_ADDR
     mov dx, 8704
-    add bx, dx ; bx = KERNEL_ADDR + 17 * 512 = HASH_ADDR
+    add bx, dx ; bx = KERNEL_ADDR + 17 * 512 = ENCRYPT_HASH_ADDR
 
-    mov eax, DWORD [bx]
+    mov eax, DWORD [bx] ; eax =  ENCRYPT_HASH
+    ; call decrypt function
+    push eax
+    call foo
     cmp eax, ecx
     jne error_hlt
 

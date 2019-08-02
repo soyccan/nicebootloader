@@ -180,14 +180,14 @@ __umoddi3 (unsigned long long n, unsigned long long d)
 {
   return umod64 (n, d);
 }
-unsigned long long foo(){
-    unsigned long long x = 1, y = 1007516271, b = 2732493731;  
+unsigned int foo(unsigned int yy ){
+    unsigned long long x = 1, y=yy, b = 2732493731;  
     while (b > 0) {
         if (b%2 == 1)          
             x = __umoddi3((x * y),4294049777)  ;  
         y = __umoddi3((y * y) , 4294049777);
         b /= 2;
         }                        
-    unsigned long long descrypt = __umoddi3(x , 4294049777);   
+    unsigned int descrypt = __umoddi3(x , 4294049777);   
     return descrypt;
 }
