@@ -9,8 +9,9 @@ GDT_LIMIT   equ  GDT_SIZE-1
 ;--------記憶體大小記錄在 0x510--------
 total_mem_bytes equ 0x510
 
-section loader vstart=LOADER_BASE_ADDR
+; section loader vstart=LOADER_BASE_ADDR
 [BITS 16]
+; _start:
 ;--------列印字串--------
     mov sp, LOADER_BASE_ADDR
     mov bp, loadermsg
