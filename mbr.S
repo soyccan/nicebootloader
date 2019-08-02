@@ -1,7 +1,7 @@
 %include "boot.inc"
 
 
-SECTION MBR vstart=0x7c00  
+SECTION MBR vstart=0x7c00
 ;clear all register and set stack at 0x7c00 , set gs (not have to) to the address of display card in text mode
     mov ax, cs
     mov ds, ax
@@ -18,7 +18,7 @@ SECTION MBR vstart=0x7c00
     ;BH = video arrtribute to be use on blank lines
     ;(CH, CL) = row, clm of lower-right corner to scroll
     ;(DH, DL) = row, clm of upper-left corner to scroll
-    ;in VGA, there are 25 lines and each has 80 words, index is begin from 0 , so DH=0x18, DL=0x4f 
+    ;in VGA, there are 25 lines and each has 80 words, index is begin from 0 , so DH=0x18, DL=0x4f
 
     mov ax, 0x600
     mov bx, 0x700
@@ -31,7 +31,7 @@ SECTION MBR vstart=0x7c00
 ;style of word is 0xA4, A=background green & blinking, 4=red front
 
     mov byte [gs:0x00], '1'
-    mov byte [gs:0x01], 0xA4 
+    mov byte [gs:0x01], 0xA4
 
     mov byte [gs:0x02], ' '
     mov byte [gs:0x03], 0xA4
@@ -39,16 +39,16 @@ SECTION MBR vstart=0x7c00
     mov byte [gs:0x04], 'M'
     mov byte [gs:0x05], 0xA4
 
-    mov byte [gs:0x06], 'B' 
+    mov byte [gs:0x06], 'B'
     mov byte [gs:0x07], 0xA4
-    
-    mov byte [gs:0x08], 'R' 
+
+    mov byte [gs:0x08], 'R'
     mov byte [gs:0x09], 0xA4
 
 ;read loader from disk to RAM
     mov eax, LOADER_START_SECTOR
     mov bx, LOADER_BASE_ADDR
-    mov cx, 4
+    mov cx, 5
     call read_disk
 ;execute loader
     jmp LOADER_BASE_ADDR
@@ -68,7 +68,7 @@ read_disk:
     out dx, al
 
     mov eax, esi
-;set register for LBA low 
+;set register for LBA low
     mov dx, 0x1f3
     out dx, al
 ;set register for LBA mid
@@ -86,7 +86,7 @@ read_disk:
     or  al, 0xe0    ;lba mode
     mov dx, 0x1f6
     out dx, al
-;set register for command 
+;set register for command
     mov dx, 0x1f7
     mov al, 0x20    ;0x20 is read
     out dx, al
