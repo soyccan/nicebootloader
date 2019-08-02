@@ -57,7 +57,7 @@ int main(){
 	unsigned int hash = myhash(buff,fileLen);
 
 	/* Hash encryption */
-	unsigned int cipher = powMod(12, 5, 323); // p=65521, q=65537, e=4293918721, d=4293918722
+	unsigned int cipher = powMod(hash, 11, 4294049777); // p=65521, q=65537, e=4293918721, d=4293918722 n=4294049777
 	printf("%u\n", cipher);
 	fclose(fp);
 }

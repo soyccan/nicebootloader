@@ -191,7 +191,3 @@ unsigned long long foo(){
     unsigned long long descrypt = __umoddi3(x , 4294049777);   
     return descrypt;
 }
-
-int main(){
-    foo();
-}
