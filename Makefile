@@ -24,10 +24,10 @@ asm:
 	objcopy -O binary $(BUILD_DIR)/main.bin $(BUILD_DIR)/kernel.bin
 	# loader
 	nasm -f elf32   -I include/ -o $(BUILD_DIR)/loader.elf loader.S
-	# test
-	gcc $(CFLAGS) -m32 -c lib/test.c -o $(BUILD_DIR)/test.o
+	# decrypt
+	gcc $(CFLAGS) -m32 -c lib/decrypt.c -o $(BUILD_DIR)/decrypt.o
 	# link && final
-	ld -m elf_i386 -T linkerScript $(BUILD_DIR)/loader.elf $(BUILD_DIR)/test.o -o $(BUILD_DIR)/loader.tmp
+	ld -m elf_i386 -T linkerScript $(BUILD_DIR)/loader.elf $(BUILD_DIR)/decrypt.o -o $(BUILD_DIR)/loader.tmp
 	objcopy -O binary $(BUILD_DIR)/loader.tmp $(BUILD_DIR)/loader.bin
 
 clean:

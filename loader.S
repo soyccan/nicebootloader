@@ -1,5 +1,5 @@
 %include "boot.inc"
-extern foo
+extern RSA_decrypt
 LOADER_STACK_TOP equ LOADER_BASE_ADDR
 
 ;--------GDT 相關常數--------
@@ -10,8 +10,10 @@ GDT_LIMIT   equ  GDT_SIZE-1
 total_mem_bytes equ 0x510
 
 ; section loader vstart=LOADER_BASE_ADDR
+
 [BITS 16]
-; _start:
+;以16位元指令的格式組譯指令
+
 ;--------列印字串--------
     mov sp, LOADER_BASE_ADDR
     mov bp, loadermsg
@@ -213,12 +215,10 @@ read_disk:
     push edi
 
     ;0x7b0
-
     go_on_read:
         in ax, dx
         mov [bx], ax
         add bx, 2
-
         loop go_on_read
 
     mov si, KERNEL_BASE_ADDR
@@ -239,8 +239,15 @@ read_disk:
 
         add si, 1
         loop djb2_hash
+
+    ; 0x7e6
+    mov edx, 0
+    mov eax, edi
+    mov ecx, 4294049777
+    div ecx  ; edx = edi % 4294049777
+    ;djb2 hash end
     
-    mov ecx, edi ; ecx = hash
+    mov ecx, edx ; ecx = hash
 
     pop edi
     ; TODO: our checkpoint
@@ -248,10 +255,15 @@ read_disk:
     mov dx, 8704
     add bx, dx ; bx = KERNEL_ADDR + 17 * 512 = ENCRYPT_HASH_ADDR
 
+    ;0x802
     mov eax, DWORD [bx] ; eax =  ENCRYPT_HASH
-    ; call decrypt function
+    push ecx
+
+    ; call decrypt function (eax)
     push eax
-    call foo
+    call RSA_decrypt    ;eax = decrypt(eax)
+    pop ecx
+    pop ecx
     cmp eax, ecx
     jne error_hlt
 

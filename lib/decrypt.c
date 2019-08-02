@@ -180,7 +180,7 @@ __umoddi3 (unsigned long long n, unsigned long long d)
 {
   return umod64 (n, d);
 }
-unsigned int foo(unsigned int yy ){
+unsigned int RSA_decrypt(unsigned int yy ){
     unsigned long long x = 1, y=yy, b = 2732493731;  
     while (b > 0) {
         if (b%2 == 1)          
