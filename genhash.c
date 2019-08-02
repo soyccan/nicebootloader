@@ -54,10 +54,10 @@ int main(){
 
 	fread(buff, sizeof(char), fileLen, fp);
 
-	unsigned int hash = myhash(buff,fileLen);
+	unsigned int hash = myhash(buff,fileLen) % 4294049777;
 
 	/* Hash encryption */
-	unsigned int cipher = powMod(12, 5, 323); // p=65521, q=65537, e=4293918721, d=4293918722
+	unsigned int cipher = powMod(hash, 11, 4294049777); // p=65521, q=65537, e=4293918721, d=4293918722 n=4294049777
 	printf("%u\n", cipher);
 	fclose(fp);
 }
