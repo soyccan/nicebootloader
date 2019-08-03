@@ -1,7 +1,7 @@
 #include "print.h"
 
 void _start(){
-    put_str("\r\nTerry_kernel\ncoox\bl");
+    put_str("\r\nSuccess boot !!!");
     while(1){
         asm("hlt");
     };
