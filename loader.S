@@ -61,8 +61,8 @@ total_mem_bytes equ 0x510
 
             mov ah, 86h
             xor dx,dx
-            mov cx,20   
-            int 0x10    ;等待 cx/dx 微秒
+            mov cx,10  
+            int 0x15    ;等待 cx/dx 微秒
             pop cx
             loop boot_animate
         pop cx
