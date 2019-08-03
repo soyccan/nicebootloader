@@ -27,16 +27,24 @@ total_mem_bytes equ 0x510
         mov cx, 10
         boot_animate:
             push cx
+
+            ;clear
+            mov ax, 0x600
+            mov bx, 0x700
+            mov cx, 0
+            mov dx, 0x184f
+            int 0x10
+
             push bp
             mov ax, 0x1301  ;print and move cursor 
             mov bx, 0x000f  ;black background, white char
             mov dx, 0x1800 ;row, column
             mov cx, 52  ;length
             mov bp, blank_line
-            int 0x10
-            int 0x10
-            int 0x10
-            int 0x10
+            ; int 0x10
+            ; int 0x10
+            ; int 0x10
+            ; int 0x10
             pop bp
 
             mov bh, 0       ; page 0
