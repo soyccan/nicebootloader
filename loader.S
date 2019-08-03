@@ -15,19 +15,44 @@ total_mem_bytes equ 0x510
 
 ;--------列印字串--------
     mov sp, LOADER_BASE_ADDR
-    mov bp, loadermsg
-    mov ax, 0x1301  ;print and move cursor 
-    mov bx, 0x000f  ;black background, white char
-    mov dx, 0x1800 ;row, column
 
-    mov cx,19   ;loop time
-    boot_animate:
+    mov cx, 5
+    boot_animate_loop:
         push cx
-        mov cx, 52  ;length
-        int 0x10
-        add bp,52
+        mov bp, loadermsg
+        ; 10 frame animate
+        mov cx, 10
+        boot_animate:
+            push cx
+            push bp
+            mov ax, 0x1301  ;print and move cursor 
+            mov bx, 0x000f  ;black background, white char
+            mov dx, 0x1800 ;row, column
+            mov cx, 52  ;length
+            mov bp, blank_line
+            int 0x10
+            int 0x10
+            int 0x10
+            int 0x10
+            pop bp
+
+            mov cx,19   ;loop time
+            print_boot_img:
+                push cx
+                mov cx, 52  ;length
+                int 0x10
+                add bp,52
+                pop cx
+                loop print_boot_img
+
+            mov ah, 86h
+            xor dx,dx
+            mov cx,20   
+            int 0x15    ;等待 cx/dx 微秒
+            pop cx
+            loop boot_animate
         pop cx
-        loop boot_animate
+        loop boot_animate_loop
 
 ;--------e820 get memory size--------
     mov bx, 0x001f
@@ -545,4 +570,7 @@ db `     .dOc..,lddddddddlcc:;\'\';cclddddddddddd;;ll.   \n`
 db `   .coc,;::ldddddddddddddlcccc:ldddddddddl:,cO;    \n`
 db `,xl::,..,cccccccccccccccccccccccccccccccc:;\':xx,   \n`
 db `cNd.........................................;lOc   \n`
+db `                                                   \n`
+
+blank_line:
 db `                                                   \n`
