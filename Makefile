@@ -1,6 +1,5 @@
 BUILD_DIR=./build
 LIB=-I include/
-#CFLAGS=-fno-builtin -fno-stack-protector -O2
 CFLAGS=-fno-builtin -fno-stack-protector -O2
 
 
@@ -10,10 +9,10 @@ all:img
 img:asm hash kernelSize
 	# cp -f hd60M.img.bak hd60M.img
 	dd if=$(BUILD_DIR)/mbr.bin of=hd60M.img count=1 bs=512 conv=notrunc
-	dd if=$(BUILD_DIR)/loader.bin of=hd60M.img bs=512 count=35 seek=1 conv=notrunc
-	dd if=$(BUILD_DIR)/kernel.bin of=hd60M.img bs=512 count=200 seek=36 conv=notrunc
-	dd if=hash of=hd60M.img bs=512 count=1 seek=53 conv=notrunc
-	dd if=kernelSize of=hd60M.img bs=512 count=1 seek=54 conv=notrunc
+	dd if=$(BUILD_DIR)/loader.bin of=hd60M.img bs=512 count=55 seek=1 conv=notrunc
+	dd if=$(BUILD_DIR)/kernel.bin of=hd60M.img bs=512 count=200 seek=56 conv=notrunc
+	dd if=hash of=hd60M.img bs=512 count=1 seek=73 conv=notrunc
+	dd if=kernelSize of=hd60M.img bs=512 count=1 seek=74 conv=notrunc
 
 asm:
 	nasm -I include/ -o $(BUILD_DIR)/mbr.bin mbr.S
@@ -26,8 +25,12 @@ asm:
 	nasm -f elf32   -I include/ -o $(BUILD_DIR)/loader.elf loader.S
 	# decrypt
 	gcc $(CFLAGS) -m32 -c lib/decrypt.c -o $(BUILD_DIR)/decrypt.o
+	#print_boot_error_message
+	nasm -f elf32   -I include/ -o $(BUILD_DIR)/print_boot_error_message.elf lib/print_boot_error_message.S	
+	#print_boot_success_message
+	nasm -f elf32   -I include/ -o $(BUILD_DIR)/print_boot_success_message.elf lib/print_boot_success_message.S	
 	# link && final
-	ld -m elf_i386 -T linkerScript $(BUILD_DIR)/loader.elf $(BUILD_DIR)/decrypt.o -o $(BUILD_DIR)/loader.tmp
+	ld -m elf_i386 -T linkerScript $(BUILD_DIR)/loader.elf $(BUILD_DIR)/decrypt.o $(BUILD_DIR)/print_boot_error_message.elf $(BUILD_DIR)/print_boot_success_message.elf  -o $(BUILD_DIR)/loader.tmp
 	objcopy -O binary $(BUILD_DIR)/loader.tmp $(BUILD_DIR)/loader.bin
 
 clean:
