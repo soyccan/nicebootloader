@@ -170,7 +170,7 @@ p_mode_start:
     mov ax, SELECTOR_VIDEO
     mov gs, ax
 ;顯示 P
-    mov byte [gs:160], 'P'
+    ; mov byte [gs:160], 'P'
 ;--------載入 kernel--------
     mov ax, KERNEL_START_SECTOR
     mov bx, KERNEL_BASE_ADDR
@@ -203,7 +203,7 @@ p_mode_start:
 ;重新讀取分頁下的 gdt
     lgdt [gdt_ptr]
 ;show a V
-    mov byte[gs:160], 'V'
+    ; mov byte[gs:160], 'V'
 ;kernel stack
     mov esp, 0xc009f000
     jmp 0xc0000000 | KERNEL_BASE_ADDR
